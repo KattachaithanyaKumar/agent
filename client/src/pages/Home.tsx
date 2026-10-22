@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import CreateAgentModal, {
   type CreateAgentFormValues,
 } from "../components/CreateAgentModal";
+import { useNavigate } from "react-router-dom";
 
-interface Agent {
+export interface Agent {
   id: string;
   title: string;
   description: string;
@@ -29,6 +30,8 @@ const Home = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (data: CreateAgentFormValues) => {
     try {
@@ -73,6 +76,10 @@ const Home = () => {
     } catch (err) {
       console.error("Failed to delete agent", err);
     }
+  };
+
+  const handleLoadAgent = (id: string) => {
+    navigate(`/${id}`);
   };
 
   useEffect(() => {
@@ -173,7 +180,12 @@ const Home = () => {
                       {agent.description}
                     </p>
                     <div className="mt-6 flex w-full items-center justify-between">
-                      <Button type="primary">Load Agent</Button>
+                      <Button
+                        type="primary"
+                        onClick={() => handleLoadAgent(agent.id)}
+                      >
+                        Load Agent
+                      </Button>
                       <Button
                         type="text"
                         danger

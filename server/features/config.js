@@ -26,3 +26,7 @@ export const deleteConfig = (id) => {
   configs.splice(configIndex, 1);
   return true;
 };
+
+export const getConfig = (id) => {
+  return configs.find((config) => config.id === id);
+};
