@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import configRouter from "./routes/configRouter.js";
+
 const app = express();
 
 const port = process.env.PORT || 3000;
@@ -13,6 +15,7 @@ app.get("/", (req, res) => {
 });
 
 // routes
+app.use("/api/config", configRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
