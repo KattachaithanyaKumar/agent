@@ -1,16 +1,68 @@
-import { Button, Card } from "antd";
-import { useState } from "react";
+import { Button, Card, Skeleton } from "antd";
+import { DeleteOutlined, RobotOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
 import CreateAgentModal, {
   type CreateAgentFormValues,
 } from "../components/CreateAgentModal";
 
 const Home = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [agents, setAgents] = useState<
+    {
+      id: string;
+      title: string;
+      description: string;
+    }[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSubmit = (data: CreateAgentFormValues) => {
-    console.log(data);
-    setShowModal(false);
+  const handleSubmit = async (data: CreateAgentFormValues) => {
+    try {
+      const res = await fetch("http://localhost:3000/api/config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          config: {
+            title: data.name,
+            description: data.instructions,
+            tools: data.tools,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to create agent: ${res.status}`);
+      }
+
+      setShowModal(false);
+    } catch (err) {
+      console.error("Failed to create agent", err);
+    }
   };
+
+  useEffect(() => {
+    let active = true;
+
+    const loadAgents = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/config");
+        const data = await res.json();
+        if (active) setAgents(data.configs);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+
+    void loadAgents();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,8 +86,8 @@ const Home = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-6 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="h-full rounded-xl border-gray-200 shadow-sm">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="agent-card rounded-xl border-gray-200 shadow-sm">
             <div className="flex h-full flex-col items-start">
               <div className="mb-5 flex size-12 items-center justify-center rounded-lg bg-gray-100 text-2xl font-light text-gray-700">
                 +
@@ -57,6 +109,52 @@ const Home = () => {
               </Button>
             </div>
           </Card>
+
+          {isLoading ? (
+            Array.from({ length: 3 }, (_, index) => (
+              <Card
+                key={`agent-skeleton-${index}`}
+                className="agent-card rounded-xl border-gray-200 shadow-sm"
+              >
+                <Skeleton active title paragraph={{ rows: 3 }} />
+                <Skeleton.Button active className="mt-6" />
+              </Card>
+            ))
+          ) : (
+            <>
+              {agents.map((agent) => (
+                <Card
+                  key={agent.id}
+                  className="agent-card rounded-xl border-gray-200 shadow-sm"
+                >
+                  <div className="flex min-h-64 flex-col items-start">
+                    <div
+                      aria-hidden="true"
+                      className="mb-5 flex size-12 items-center justify-center rounded-lg bg-gray-100 text-2xl text-gray-700"
+                    >
+                      <RobotOutlined />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {agent.title}
+                    </h3>
+                    <p className="mt-2 flex-1 text-sm leading-6 text-gray-600">
+                      {agent.description}
+                    </p>
+                    <div className="mt-6 flex w-full items-center justify-between">
+                      <Button type="primary">Load Agent</Button>
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        aria-label={`Delete ${agent.title}`}
+                        title="Delete agent"
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </>
+          )}
         </div>
       </main>
 

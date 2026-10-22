@@ -4,19 +4,18 @@ body {
   font-family: Arial, sans-serif;
 }
 
-.agent-tools-dropdown {
-  color-scheme: light;
-  background-color: #fff;
-  color: #1f1f1f;
+.agent-card {
+  height: 100%;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.agent-tools-dropdown .ant-select-item-option {
-  color: #1f1f1f;
+.agent-card .ant-card-body {
+  height: 100%;
 }
 
-.agent-tools-dropdown
-  .ant-select-item-option-active:not(.ant-select-item-option-disabled),
-.agent-tools-dropdown
-  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-  background-color: #f0f0f0;
+.agent-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 8px 24px rgb(17 24 39 / 8%);
 }

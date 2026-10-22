@@ -9,6 +9,13 @@ const App = () => {
         token: {
           colorPrimary: "#000",
         },
+        components: {
+          Select: {
+            optionActiveBg: "#f3f4f6",
+            optionSelectedBg: "#e5e7eb",
+            optionSelectedColor: "#111827",
+          },
+        },
       }}
     >
       <BrowserRouter>
