@@ -16,3 +16,13 @@ export const createConfig = (config) => {
 export const getConfigs = () => {
   return configs;
 };
+
+export const deleteConfig = (id) => {
+  const configIndex = configs.findIndex((config) => config.id === id);
+  if (configIndex === -1) {
+    return false;
+  }
+
+  configs.splice(configIndex, 1);
+  return true;
+};

@@ -1,5 +1,5 @@
 import express from "express";
-import { getConfigs, createConfig } from "../features/config.js";
+import { getConfigs, createConfig, deleteConfig } from "../features/config.js";
 
 const router = express.Router();
 
@@ -10,9 +10,19 @@ router.get("/", (req, res) => {
 
 router.post("/", (req, res) => {
   const { config } = req.body;
-  console.log(config);
   const newConfig = createConfig(config);
   res.status(200).json({ newConfig, message: "configuration created" });
+});
+
+router.delete("/:id", (req, res) => {
+  const { id } = req.params;
+  const deleted = deleteConfig(id);
+
+  if (!deleted) {
+    return res.status(404).json({ message: "config not found" });
+  }
+
+  res.status(200).json({ id, message: "config deleted successfully" });
 });
 
 export default router;

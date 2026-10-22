@@ -5,15 +5,29 @@ import CreateAgentModal, {
   type CreateAgentFormValues,
 } from "../components/CreateAgentModal";
 
+interface Agent {
+  id: string;
+  title: string;
+  description: string;
+}
+
+interface ConfigListResponse {
+  configs: Agent[];
+}
+
+const fetchAgents = async (): Promise<Agent[]> => {
+  const res = await fetch("http://localhost:3000/api/config");
+  if (!res.ok) {
+    throw new Error(`Failed to fetch agents: ${res.status}`);
+  }
+
+  const data: ConfigListResponse = await res.json();
+  return data.configs;
+};
+
 const Home = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [agents, setAgents] = useState<
-    {
-      id: string;
-      title: string;
-      description: string;
-    }[]
-  >([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleSubmit = async (data: CreateAgentFormValues) => {
@@ -36,9 +50,28 @@ const Home = () => {
         throw new Error(`Failed to create agent: ${res.status}`);
       }
 
+      setAgents(await fetchAgents());
       setShowModal(false);
     } catch (err) {
       console.error("Failed to create agent", err);
+    }
+  };
+
+  const handleDeleteConfig = async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:3000/api/config/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to delete agent: ${res.status}`);
+      }
+
+      setAgents(await fetchAgents());
+    } catch (err) {
+      console.error("Failed to delete agent", err);
     }
   };
 
@@ -47,11 +80,10 @@ const Home = () => {
 
     const loadAgents = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/config");
-        const data = await res.json();
-        if (active) setAgents(data.configs);
+        const data = await fetchAgents();
+        if (active) setAgents(data);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch agents", err);
       } finally {
         if (active) setIsLoading(false);
       }
@@ -148,6 +180,7 @@ const Home = () => {
                         icon={<DeleteOutlined />}
                         aria-label={`Delete ${agent.title}`}
                         title="Delete agent"
+                        onClick={() => handleDeleteConfig(agent.id)}
                       />
                     </div>
                   </div>
